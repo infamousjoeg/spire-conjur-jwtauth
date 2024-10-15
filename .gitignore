@@ -11,3 +11,5 @@ vendor/
 # IDE Configurations
 .vscode/
 .idea/
+
+*.tar.gz
