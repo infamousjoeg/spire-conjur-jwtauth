@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	credentialcomposerv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/plugin/server/credentialcomposer/v1"
+	configv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/service/common/config/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
@@ -13,10 +14,25 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+// configurePlugin sets up the plugin configuration for tests
+func configurePlugin(t *testing.T, plugin *Plugin) {
+	req := &configv1.ConfigureRequest{
+		HclConfiguration: "", // Use an empty configuration or provide necessary config if needed
+	}
+
+	_, err := plugin.Configure(context.Background(), req)
+	if err != nil {
+		t.Fatalf("Failed to configure plugin: %v", err)
+	}
+}
+
 // TestComposeWorkloadJWTSVID tests the ComposeWorkloadJWTSVID method of the Plugin.
 func TestComposeWorkloadJWTSVID(t *testing.T) {
 	plugin := &Plugin{}
 	plugin.SetLogger(hclog.NewNullLogger()) // Set a no-op logger for testing
+
+	// Configure the plugin before running the tests
+	configurePlugin(t, plugin)
 
 	// Define test cases
 	tests := []struct {
@@ -103,6 +119,7 @@ func TestUpdateClaims(t *testing.T) {
 	assert.Equal(t, expectedClaims, actualClaims)
 }
 
+// TestParseTrustDomainAndWorkload tests the parseTrustDomainAndWorkload function.
 func TestParseTrustDomainAndWorkload(t *testing.T) {
 	tests := []struct {
 		name             string
